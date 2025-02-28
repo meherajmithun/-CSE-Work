@@ -8,7 +8,7 @@ void BubbleSort(int arr[] , int sz){
                 swap(arr[j] , arr[j+1]);
             }
         }
-        cout<<arr[sz-i]<<" ";
+        //cout<<arr[sz-i]<<" ";
     }
     cout<<endl;
     for(int i=0; i<sz; i++){
