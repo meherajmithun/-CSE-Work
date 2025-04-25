@@ -4,8 +4,10 @@
 using namespace std;
 
 int main(){
-    string s1; cin >> s1;
-    string s2; cin >> s2;
+    string s1;
+    cout<<"Enter string : "; cin >> s1;
+    string s2;
+    cout<<"Enter Pattern : "; cin >> s2;
     int a = s1.size();
     int b = s2.size();
     int sz = a-b+1;

@@ -8,17 +8,18 @@ void BubbleSort(int arr[] , int sz){
                 swap(arr[j] , arr[j+1]);
             }
         }
-        //cout<<arr[sz-i]<<" ";
     }
-    cout<<endl;
+    cout<<"After sorting : ";
     for(int i=0; i<sz; i++){
         cout<<arr[i]<<" ";
     }
+    cout<<endl;
 }
-
 int main(){
-    int sz; cin >> sz;
+    int sz;
+    cout<<"Enter size of the array : "; cin >> sz;
     int arr[sz];
+    cout<<"Enter element of the array : ";
     for(auto &u : arr) cin >> u;
     BubbleSort(arr,sz);
 }
