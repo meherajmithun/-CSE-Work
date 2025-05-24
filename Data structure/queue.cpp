@@ -1,55 +1,52 @@
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
-#define n 5
-int front = -1,back=-1;
-int arr_queue[n];
 
-void endqueue(int x){
-    if(back == n-1){
-        cout<<"Overflow"<<endl;
-    }
-    else if(front == -1 and back == -1){
-        front = 0,
-        back = 0;
-        arr_queue[back] = x;
-    }
-    else{
-        back++;
-        arr_queue[back] = x;
+#define SIZE 5
+int front = -1, rear = -1;
+int arr_queue[SIZE];
+
+void enqueue(int x) {
+    if (rear == SIZE - 1) {
+        cout << "Overflow" << endl;
+    } else if (front == -1 && rear == -1) {
+        front = rear = 0;
+        arr_queue[rear] = x;
+    } else {
+        rear++;
+        arr_queue[rear] = x;
     }
 }
 
-void dequeue(){
-    if(front == -1 and back == -1){
-        cout<<"Overflow"<<endl;
-    }
-    else if(front == back){
-        //cout<<queue[front]<<endl;
-        back = -1;
-        front = -1;
-    }
-    else{
+void dequeue() {
+    if (front == -1 && rear == -1) {
+        cout << "Underflow" << endl;
+    } else if (front == rear) {
+        front = rear = -1;
+    } else {
         front++;
     }
 }
 
-void display(){
-    for(int i=front; i<=back; i++){
-        cout<<arr_queue[i]<<" ";
+void display() {
+    if (front == -1 && rear == -1) {
+        cout << "Queue is empty" << endl;
+    } else {
+        for (int i = front; i <= rear; i++) {
+            cout << arr_queue[i] << " ";
+        }
+        cout << endl;
     }
-    cout<<endl;
 }
 
-int main(){
-    //It mean's push
-    endqueue(5);
-    endqueue(7);
-    endqueue(12);
-    endqueue(25);
-    endqueue(25);
-    
-    dequeue(); // means pop
-    endqueue(14);
-    
-    display();
+int main() {
+    enqueue(5);
+    enqueue(7);
+    enqueue(12);
+    enqueue(25);
+    enqueue(25); // Should show overflow if more added
+
+    dequeue(); // remove 5
+    enqueue(14); // insert 14 at the end
+
+    display(); // expected: 7 12 25 25 14
 }

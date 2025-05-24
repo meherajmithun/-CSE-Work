@@ -1,6 +1,5 @@
 #include<bits/stdc++.h>
 using namespace std;
-int i =1;
 
 void TOH(int n,int A, int B, int C){
     if(n>0){
@@ -11,6 +10,7 @@ void TOH(int n,int A, int B, int C){
 }
 
 int main(){
+    cout<<"Enter n : ";
     int tower; cin>>tower;
 
     TOH(tower,1,2,3);

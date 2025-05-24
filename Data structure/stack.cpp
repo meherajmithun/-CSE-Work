@@ -9,9 +9,6 @@ void push(int data){
         top = top + 1;
         arr[top] = data;
     }
-    else{
-        cout<<"size exceeded"<<endl;
-    }
 }
 
 void pop(){
