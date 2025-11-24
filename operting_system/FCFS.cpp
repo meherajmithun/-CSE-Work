@@ -3,7 +3,7 @@ using namespace std;
 
 
 int main(){
-	int wt[20],tat[20],bt[20];
+	int wt[20],tat[20],bt[20];	
 	cout<<"Enter the number of process : ";
 	int n; cin>>n;
 

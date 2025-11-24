@@ -5,9 +5,6 @@ from tkinter import ttk, messagebox
 import sqlite3
 
 
-# ==========================
-#   OPEN SALES TRACKER
-# ==========================
 def open_sales_tracker():
     create_sales_db()
 
@@ -28,9 +25,7 @@ def open_sales_tracker():
     build_sales_table(tab_view)
 
 
-# ==========================
-#   DATABASE CREATION
-# ==========================
+#database
 def create_sales_db():
     conn = sqlite3.connect("sales.db")
     cur = conn.cursor()
@@ -48,9 +43,7 @@ def create_sales_db():
     conn.close()
 
 
-# ==========================
-#   ADD SALES TAB
-# ==========================
+
 def build_add_sales(frame):
     # --- Fetch crop names from crops.db ---
     conn = sqlite3.connect("crops.db")
@@ -125,10 +118,7 @@ def build_add_sales(frame):
                   fg_color="#2e7d32", hover_color="#1b5e20",
                   command=add_sale).pack(pady=20)
 
-
-# ==========================
-#   VIEW SALES TAB
-# ==========================
+#======
 def build_sales_table(frame):
     table_frame = ctk.CTkFrame(frame)
     table_frame.pack(pady=10)
@@ -168,10 +158,7 @@ def build_sales_table(frame):
     ctk.CTkButton(btn_frame, text="Delete Selected", fg_color="#b71c1c",
                   hover_color="#7f0000", width=150, command=delete_sale).grid(row=0, column=0, padx=20)
 
-
-# ==========================
-#   LOAD SALES INTO TABLE
-# ==========================
+#=====
 def load_sales(tree):
     for row in tree.get_children():
         tree.delete(row)

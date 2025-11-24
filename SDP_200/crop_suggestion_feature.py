@@ -22,12 +22,7 @@ def open_crop_suggestion():
                   command=open_suggestion_from_database).pack(pady=10)
 
     # ✅ Option 2 (Future Update)
-    ctk.CTkButton(btn_frame, text="Suggestion Based on Sales Tracking",
-                  width=280, height=45,
-                  fg_color="#81c784", hover_color="#1b5e20",
-                  command=lambda: messagebox.showinfo("Coming Soon",
-                                                      "Sales tracking suggestion is coming in future ✅")
-                  ).pack(pady=10)
+   
 
 
 # ✅ SUGGESTION FROM DATABASE SCREEN
