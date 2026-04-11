@@ -19,9 +19,6 @@ int main()
         int cnt = 0;
         queue<int> q;
 
-        // cout << "Reference string : ";
-        // for (auto a : reference) cout << a << " "; cout <<endl;
-
         for (auto a : reference)
         {
             if (check[a] == 0)

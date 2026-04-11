@@ -1,3 +1,4 @@
+//simple Hospital Management
 class Doctor{
     int doctorId;
     String doctorname,specialization;
