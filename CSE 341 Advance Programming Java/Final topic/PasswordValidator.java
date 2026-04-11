@@ -1,43 +1,33 @@
-import java.util.Scanner;
+import java.util.*;
 
 class MyException extends Exception{
-    MyException(String msg){
-        super(msg);
+    MyException(String s){
+        super(s);
     }
 }
-
-public class PasswordValidator{
-    
-    void IsValid(String s) throws MyException{
-        int r=0,f=0;
+class password{
+    void isValid(String s) throws MyException{
         for(int i=0; i<s.length(); i++){
-            if(s.charAt(i)-'0'>=0 && s.charAt(i)-'0'<10){
-                f=1;
+            // int a = s.charAt(i)-'0';
+            // System.out.println(a);
+            if(s.charAt(i)>'t'){
+                throw new MyException("password is not valid");
             }
         }
-        if((s.length()>7) && (f==1)){
-            System.out.println("Password is valid");
-        }
-        else{
-            throw new MyException("Password is not valid");
-        }
+        System.out.println("Password is valid\n");
     }
-
-
-    public static void main(String[]args){
+}
+class passwordValidator{
+    public static void main(String[] args){
         Scanner sc = new Scanner(System.in);
-        String password = sc.next();
-        System.out.println(password);
-
-        PasswordValidator p = new PasswordValidator();
-
+        String pass = sc.next();
+        password p = new password();
+        
         try{
-            p.IsValid(password);
+            p.isValid(pass);
         }
         catch(MyException e){
             System.out.println(e);
         }
-
-
     }
 }
