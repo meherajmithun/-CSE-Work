@@ -1,7 +1,0 @@
-NO	Model	price	taxes
-ln91 Corvette 1300.0 65.0
-s9p4 Camry 9860.0 493.0
-9A02 Chevrolet_Impala 2498.0 124.9
-p406 Toyota_Yaris 6700.0 335.0
-Rh23 Rolls_Royce 9999.0 499.95000000000005
-17c2 Avalon 4534.0 226.70000000000002
