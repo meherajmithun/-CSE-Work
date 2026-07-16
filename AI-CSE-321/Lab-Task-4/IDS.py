@@ -15,9 +15,11 @@ def dls(src, dest, limit):
         if(node == dest):
             return path,cost
         
-        if(depth<limit):
-            for child, weight in reversed(graph[node]):
-                stack.append((child, depth+1, cost+weight, path+[child]))
+        if depth>=limit:
+            continue
+
+        for child, weight in reversed(graph[node]):
+            stack.append((child, depth+1, cost+weight, path+[child]))
 
     return None,None
 
@@ -35,4 +37,3 @@ def ids(src, dest, mx_depth):
     print("Goal Not Found")
 
 ids('A', 'G', 5)
-
