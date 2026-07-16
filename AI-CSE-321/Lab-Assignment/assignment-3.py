@@ -26,7 +26,6 @@ add_book("Counting", 2)
 add_book("Graph", 2)
 
 print(library)
-
 while 1:
     print("Enter choices : ")
     print("1. add book ")
