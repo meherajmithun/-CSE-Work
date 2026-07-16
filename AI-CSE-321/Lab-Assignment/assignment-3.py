@@ -18,7 +18,6 @@ def borrowed(name):
 def returned(name):
     library[name] += 1
 
-
 add_book("dijkstra", 2)
 add_book("DP", 2)
 add_book("NT", 2)
