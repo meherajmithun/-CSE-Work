@@ -1,0 +1,175 @@
+import java.util.*;
+import java.io.*;
+import java.util.ArrayList;
+
+class cropManagement{
+    String cropName,season,weather,sunLight;
+    int water, price;//in liter
+    cropManagement(){}
+
+    cropManagement(String cropName,String season, String weather, String sunLight, int water,int p){
+        this.cropName = cropName;
+        this.season = season;
+        this.weather = weather;
+        this.sunLight = sunLight;
+        this.water = water;
+        this.price = p;
+    }
+
+    public String toString(){
+        return (cropName+" "+season+" "+weather+" "+sunLight+" "+water+" "+price+"\n");
+    }
+    public String toStringPrint() {
+        return "Crop Name : " + cropName + "\n" +
+            "Season : " + season + "\n" +
+            "Weather : " + weather + "\n" +
+            "Sunlight : " + sunLight + "\n" +
+            "Water : " + water + "\n" + 
+            "Price : " + price + "\n";
+    }
+}
+
+public class Main{
+    public static void main(String[] args) throws Exception{
+
+        File f = new File("info.txt");
+        FileWriter fw = new FileWriter(f,true);
+        // ArrayList<cropManagement> data = new ArrayList<>();
+        Scanner sc = new Scanner(System.in);
+
+        for(int i=0; i<2; i++){
+            System.out.print("CropName : ");  String name = sc.next();
+            System.out.print("Season : ");  String season = sc.next();
+            System.out.print("Weather : ");  String weather = sc.next();
+            System.out.print("SunLight : ");  String sunLight = sc.next();
+            System.out.print("Water (Ltr per day) : ");  int water = sc.nextInt();
+            System.out.print("Price (Per KG) : ");  int price = sc.nextInt();
+
+            cropManagement c = new cropManagement(name, season, weather, sunLight, water,price);
+            fw.write(c.toString());
+        }
+        fw.close();
+    }
+}
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.io.*;
+class cropSuggestion {
+    cropSuggestion(){
+        
+    }
+    // String cropName,season,weather,sunLight;
+    // int water;//in liter
+    cropManagement suggestOnCropName(String s) throws Exception{
+        
+
+        File f = new File("info.txt");
+
+        Scanner sc = new Scanner(f);
+
+        while(sc.hasNext()){
+            String cropName = sc.next();
+            String season = sc.next();
+            String weather = sc.next();
+            String sunLight = sc.next();
+            int water = sc.nextInt();
+            int price = sc.nextInt();
+            if(s.equals(cropName)){
+                cropManagement cs = new cropManagement(cropName, season, weather, sunLight, water,price);
+                sc.close();
+                return cs;
+            }
+        }
+        sc.close();
+        return null;
+    }
+    cropManagement suggestOnSeason(String s) throws Exception{
+        
+
+        File f = new File("info.txt");
+
+        Scanner sc = new Scanner(f);
+
+        while(sc.hasNext()){
+            String cropName = sc.next();
+            String season = sc.next();
+            String weather = sc.next();
+            String sunLight = sc.next();
+            int water = sc.nextInt();
+            int price = sc.nextInt();
+            if(s.equals(season)){
+                cropManagement cs = new cropManagement(cropName, season, weather, sunLight, water,price);
+                sc.close();
+                return cs;
+            }
+        }
+        sc.close();
+        return null;
+    }
+    cropManagement suggestOnWeather(String s) throws Exception{
+        
+
+        File f = new File("info.txt");
+
+        Scanner sc = new Scanner(f);
+
+        while(sc.hasNext()){
+            String cropName = sc.next();
+            String season = sc.next();
+            String weather = sc.next();
+            String sunLight = sc.next();
+            int water = sc.nextInt();
+            int price = sc.nextInt();
+            if(s.equals(weather)){
+                cropManagement cs = new cropManagement(cropName, season, weather, sunLight, water,price);
+                sc.close();
+                return cs;
+            }
+        }
+        sc.close();
+        return null;
+    }
+
+}
+public class suggestion{
+    public static void main(String[] args) throws Exception{
+
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("Enter the suggestion option : ");
+        System.out.println("1.Suggestion based on CropName : ");
+        System.out.println("2.Suggestion based on Season : ");
+        System.out.println("3.Suggestion based on Weather : ");
+
+        String type = sc.next();
+        type = type.toLowerCase();
+        System.out.println(type);
+
+        cropSuggestion cs = new cropSuggestion();
+
+        if(type.equals("cropname")){
+            System.out.print("Crop name that you want suggestion : ");
+            String suggest = sc.next();
+            cropManagement result = cs.suggestOnCropName(suggest);
+            // for(cropManagement c : res){
+            //     System.out.println(c);
+            // }
+            System.out.println(result.toStringPrint());
+        }
+        else if(type.equals("season")){
+            System.out.print("Season that you want suggestion : ");
+            String suggest = sc.next();
+            cropManagement result = cs.suggestOnSeason(suggest);
+            System.out.println(result.toStringPrint());
+        }
+        else if(type.equals("weather")){
+            System.out.print("Weather that you want suggestion : ");
+            String suggest = sc.next();
+            cropManagement result = cs.suggestOnWeather(suggest);
+            System.out.println(result.toStringPrint());
+        }
+        else{
+            System.out.println("Invalid Type! Try again");
+        }
+    }
+}

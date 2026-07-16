@@ -1,0 +1,6 @@
+ln91  Corvette        1300
+s9p4  Camry           9860
+9A02  Chevrolet_Impala 2498
+p406  Toyota_Yaris    6700
+Rh23  Rolls_Royce     9999
+17c2  Avalon          4534

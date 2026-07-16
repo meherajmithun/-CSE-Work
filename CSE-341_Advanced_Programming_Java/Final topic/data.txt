@@ -1,0 +1,2 @@
+Income,Salary,10000.0
+Expense,Breakfast,100.0

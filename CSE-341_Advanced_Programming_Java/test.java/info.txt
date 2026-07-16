@@ -1,0 +1,6 @@
+Jute Rainy Humid Partial 12 10
+Rice Summer Hot FullSun 10 20
+Wheat Winter cold Moderate 6 50
+Maize Summer Warm Fullsun 8 55
+potato Winter cold Moderate 5 100
+Chicken Winter Moderate Full 5 200

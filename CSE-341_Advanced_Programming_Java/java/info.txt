@@ -1,0 +1,9 @@
+Rice Winter Rainy Moderate 12 100
+Rice Winter Rainy Moderate 12 100
+Rice Winter Rainy Moderate 12 100
+Rice Winter Rainy Moderate 12 100
+Rice Winter Rainy Moderate 12 100
+Rice Winter Rainy Moderate 12 100
+Meat wo 12 12 11 1
+Rice Winter Hot Moderate 12 120
+Rice,Monsoon,Humid,High,80,35
