@@ -10,7 +10,7 @@ graph = {'A': [('B',5), ('C', 7)],
 def dfs(src, dest):
     stack = Queue()
     stack.put((src, 0))
-    while not stack.empty():
+    while stack:
         node, cost = stack.get()
         print(node, end=" ")
         if node == dest:
