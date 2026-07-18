@@ -7,25 +7,25 @@ graph = {'A': [('B',5), ('C', 7)],
          'E': [],
          'F': []
          }
-def ucs(src, dest):
-    visited=[]
-    pq=[]
-    heapq.heappush(pq, (0, src, [src]))
 
-    while pq:
-        cost, node, path = heapq.heappop(pq)
+def DLS(src, dest, limit):
+    stack=[]
+    visited=[]
+    stack.append((src, 0, 0, [src]))
+    while stack:
+        node, cost, depth , path = stack.pop()
         if node not in visited:
             visited.append(node)
-            if(node == dest):
+            if node == dest:
                 print("Destination Found")
-                print("Path : "," -> ".join(path))
-                print("Cost -> ", cost)
                 return
-            for child, weight in graph[node]:
+            if depth == limit:
+                continue
+
+            for child, weight in reversed(graph[node]):
                 if child not in visited:
-                    heapq.heappush(pq, (cost+weight, child, path+[child]))
+                    stack.append((child, cost+weight, depth+1, path+[child]))
 
     print("Destination Not Found")
 
-ucs('A', 'F')
-
+DLS('A', 'K', 3)

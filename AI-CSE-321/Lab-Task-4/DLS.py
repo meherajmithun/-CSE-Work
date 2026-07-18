@@ -1,32 +1,31 @@
-graph = {
-    'A': [('B', 2), ('C', 4)],
-    'B': [('D', 3), ('E', 1)],
-    'C': [('F', 5)],
-    'D': [],
-    'E': [('G', 2)],
-    'F': [],
-    'G': []
-}
+import heapq
 
-def DLS(limit, src, des):
-            #node , depth, cost, path
-    stack = [(src, 0, 0, [src])]
+graph = {'A': [('B',5), ('C', 7)],
+         'B': [('D',7),('E', 3)],
+         'C': [('F',4)],
+         'D': [],
+         'E': [],
+         'F': []
+         }
 
+def DLS(src, dest, limit):
+    stack=[]
+    visited=[]    #node , depth, cost, path
+    stack.append((src, 0, 0, [src]))
     while stack:
-        node, depth,cost, path = stack.pop()
-    
-        if node==des:
-            print("Goal Found")
-            print("Path : "," -> ".join(path))
-            print("Total Cost : ",cost)
-            return
-    
-        if limit < depth:
-            print("Goal Not Found")
-            continue
-        
-        for child, weight in reversed(graph[node]):
-            stack.append((child, depth+1, cost+weight, path+[child]))
+        node, cost, depth , path = stack.pop()
+        if node not in visited:
+            visited.append(node)
+            if node == dest:
+                print("Destination Found")
+                return
+            if depth == limit:
+                continue
 
-DLS(3, 'A', 'G')
+            for child, weight in reversed(graph[node]):
+                if child not in visited:
+                    stack.append((child, cost+weight, depth+1, path+[child]))
 
+    print("Destination Not Found")
+
+DLS('A', 'K', 3)

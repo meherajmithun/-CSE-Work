@@ -1,4 +1,3 @@
-from queue import Queue
 graph = {'A': [('B',5), ('C', 7)],
          'B': [('D',7),('E', 3)],
          'C': [('F',4)],
@@ -6,19 +5,25 @@ graph = {'A': [('B',5), ('C', 7)],
          'E': [],
          'F': []
          }
-
 def dfs(src, dest):
-    stack = Queue()
-    stack.put((src, 0))
+    visited=[]
+    stack = []
+    stack.append((src, 0))
     while stack:
-        node, cost = stack.get()
-        print(node, end=" ")
-        if node == dest:
-            print("\nDestination Found\nCost -> ",cost)
-            return
+        node , cost = stack.pop()
+        if node not in visited:
+            visited.append(node)
+            print(node, end=" ")
+            if node==dest:
+                print("Destination Found")
+                return
+            for child, weight in reversed(graph[node]):
+                if child not in visited:
+                    stack.append((child, weight+cost))
         
-        for child,weight in reversed(graph[node]):
-            stack.put((child,cost+weight))
 
-dfs('A', 'D')
-            
+
+    print("Destination Not Found")
+
+dfs('A', 'F')
+
