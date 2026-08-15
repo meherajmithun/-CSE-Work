@@ -60,6 +60,6 @@ def a_star(src, dest):
 
 des, value = a_star('Arad', 'Bucharest')
 print(value)
-print("Path ", "->".join(des))
+print("Path :", "->".join(des))
 
 
