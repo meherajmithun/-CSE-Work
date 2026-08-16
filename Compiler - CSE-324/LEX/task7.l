@@ -3,7 +3,6 @@
 %}
 
 %x COMMENT
-
 %%
 "//".*          { printf("Single Line Comment: %s\n", yytext); }
 
