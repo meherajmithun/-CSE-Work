@@ -6,7 +6,7 @@ Build an **Expense Tracker and Profit Dashboard** so a farmer can record growing
 
 Example: sell rice for 5,000 taka and record 3,000 taka in costs. The dashboard shows 5,000 taka revenue, 3,000 taka expenses, and a 2,000 taka recorded surplus.
 
-This document is an implementation plan. The features below have not been implemented yet. Complete one step, check that it works, and then continue.
+Implemented on 2026-11-17. The checklists below record the completed first version. The later improvements remain future work. See README.md for setup, data migration, limitations, and test commands.
 
 ## 1. Understand the existing project
 
@@ -26,16 +26,16 @@ The interface uses Python, Tkinter, and CustomTkinter. SQLite stores data in loc
 
 **File:** `sales_tracker_feature.py`
 
-The quantity and price fields return text. Their numeric conversion is commented out, so `total = qty * price` currently raises a `TypeError`.
+Original issue: quantity and price fields returned text, and numeric conversion was commented out. The new shared finance layer validates numeric input and calculates totals before saving.
 
-- [ ] Convert quantity and price to numbers before calculating the total.
-- [ ] Reject empty, invalid, negative, and non-finite values such as `NaN` and infinity. Require quantity and price to be greater than zero.
-- [ ] Use decimal arithmetic for money and round totals to two decimal places.
-- [ ] Validate the date with `datetime.strptime()` using `DD-MM-YYYY`.
-- [ ] Prevent saving when the crop list contains only `No Crops Found`.
-- [ ] Refresh the sales table immediately after adding a sale.
-- [ ] Read the selected row ID with `tree.selection()[0]` when deleting, and ask for confirmation.
-- [ ] Select the six displayed sales columns explicitly instead of using `SELECT *`.
+- [x] Convert quantity and price to numbers before calculating the total.
+- [x] Reject empty, invalid, negative, and non-finite values such as `NaN` and infinity. Require quantity and price to be greater than zero.
+- [x] Use decimal arithmetic for money and round totals to two decimal places.
+- [x] Validate the date with `datetime.strptime()` using `DD-MM-YYYY`.
+- [x] Prevent saving when the crop list contains only `No Crops Found`.
+- [x] Refresh the sales table immediately after adding a sale.
+- [x] Read the first selected row ID when deleting, and ask for confirmation.
+- [x] Select sales columns explicitly instead of using `SELECT *`, and map them to the six displayed fields.
 
 The existing `sales.db` has extra columns beyond the six fields used by the interface. Keep them intact; explicit column selection avoids pulling unrelated values into the table.
 
@@ -45,11 +45,11 @@ The existing `sales.db` has extra columns beyond the six fields used by the inte
 
 Close the application and make local backup copies of the database files before changing their structure. Do not publish backup files containing real account or farm data.
 
-- [ ] Add an `expenses` table to `sales.db`, keeping existing tables and rows.
-- [ ] Use `CREATE TABLE IF NOT EXISTS` so repeated startup is safe.
-- [ ] Use SQL placeholders (`?`) for values supplied by the user.
-- [ ] Resolve database paths relative to the Python files so launching from another folder does not create a different database.
-- [ ] Add a small `finance_data.py` module for reading and saving financial records.
+- [x] Add an `expenses` table to `sales.db`, keeping existing tables and rows.
+- [x] Use `CREATE TABLE IF NOT EXISTS` so repeated startup is safe.
+- [x] Use SQL placeholders (`?`) for values supplied by the user.
+- [x] Resolve database paths relative to the Python files so launching from another folder does not create a different database.
+- [x] Add a small `finance_data.py` module for reading and saving financial records.
 
 Suggested expense fields:
 
@@ -78,20 +78,20 @@ Start with two tabs, following the existing Sales Tracker layout.
 
 ### Add Expense tab
 
-- [ ] Add a crop dropdown using names from the crop catalog and retain each selected crop's ID.
-- [ ] Add a category dropdown: Seeds, Fertilizer, Labor, Irrigation, Transport, and Other.
-- [ ] Add amount, date, and optional notes fields.
-- [ ] Default the date to today.
-- [ ] Require a real crop, a positive finite amount, and a valid date.
-- [ ] Convert the amount to paisa before saving.
-- [ ] Save the record, clear the form, and refresh the list.
+- [x] Add a crop dropdown using names from the crop catalog and retain each selected crop's ID.
+- [x] Add a category dropdown: Seeds, Fertilizer, Labor, Irrigation, Transport, and Other.
+- [x] Add amount, date, and optional notes fields.
+- [x] Default the date to today.
+- [x] Require a real crop, a positive finite amount, and a valid date.
+- [x] Convert the amount to paisa before saving.
+- [x] Save the record, clear the form, and refresh the list.
 
 ### View Expenses tab
 
-- [ ] Show crop, category, amount in taka, date, and notes in a scrollable table.
-- [ ] Show the sum of the displayed expenses.
-- [ ] Allow deleting a selected expense after confirmation.
-- [ ] Show a helpful empty-state message when there are no records.
+- [x] Show crop, category, amount in taka, date, and notes in a scrollable table.
+- [x] Show the sum of the displayed expenses.
+- [x] Allow deleting a selected expense after confirmation.
+- [x] Show a helpful empty-state message when there are no records.
 
 **Check:** Add a 1,500.50 taka expense, close and reopen the window, and verify that it remains exactly 1,500.50 taka. Deleting it must update the list and total.
 
@@ -107,11 +107,11 @@ Replace the welcome-only content with three summary cards:
 
 The third figure is a simple comparison of recorded amounts. It is not a complete accounting profit calculation: unsold harvests, missing costs, and expenses from another planting cycle can affect the result.
 
-- [ ] Add an Expense Tracker button to the sidebar.
-- [ ] Display all amounts in taka with two decimal places.
-- [ ] Refresh totals after records change and provide a Refresh button.
-- [ ] Display zero for an empty database.
-- [ ] Display a negative result clearly when expenses exceed revenue.
+- [x] Add an Expense Tracker button to the sidebar.
+- [x] Display all amounts in taka with two decimal places.
+- [x] Refresh totals after records change and provide a Refresh button.
+- [x] Display zero for an empty database.
+- [x] Display a negative result clearly when expenses exceed revenue.
 
 **Check:** With 5,000 taka sales and 3,000 taka expenses, show 5,000, 3,000, and 2,000. Increase expenses to 6,000; the final card must show a 1,000 taka deficit.
 
@@ -119,13 +119,13 @@ The third figure is a simple comparison of recorded amounts. It is not a complet
 
 Complete the basic tracker and dashboard before starting this step.
 
-- [ ] Add filters for All Crops or one crop, plus a date range.
-- [ ] Apply the same filters to both sales and expenses.
-- [ ] Reject an end date earlier than the start date.
-- [ ] Normalize old sales dates to `YYYY-MM-DD` after backing up the database. Flag invalid dates for correction and report excluded records when filtering.
-- [ ] Use crop IDs for crop-specific reports; show unassigned legacy sales separately.
-- [ ] Add Export CSV using Python's built-in `csv` module and a save-file dialog.
-- [ ] Export the filtered records, currency, filter dates, and summary totals.
+- [x] Add filters for All Crops or one crop, plus a date range.
+- [x] Apply the same filters to both sales and expenses.
+- [x] Reject an end date earlier than the start date.
+- [x] Normalize old sales dates to `YYYY-MM-DD` after backing up the database. Flag invalid dates for correction and report excluded records when filtering.
+- [x] Use crop IDs for crop-specific reports; show unassigned legacy sales separately.
+- [x] Add Export CSV using Python's built-in `csv` module and a save-file dialog.
+- [x] Export the filtered records, currency, filter dates, and summary totals.
 
 **Check:** Records outside the selected crop or date range must not affect the filtered totals. Open the exported CSV and compare its numbers with the screen.
 
@@ -133,15 +133,15 @@ Complete the basic tracker and dashboard before starting this step.
 
 Use temporary test databases so checks do not change real farm records.
 
-- [ ] Sales entry works with valid numbers and rejects invalid input.
-- [ ] Expenses remain available after restarting the app.
-- [ ] Empty datasets, decimal amounts, and negative balances display correctly.
-- [ ] Date filters work across month and year boundaries.
-- [ ] Invalid legacy data is reported rather than silently ignored.
-- [ ] Adding or deleting records refreshes the relevant totals.
-- [ ] Cancelling deletion or CSV export makes no changes.
-- [ ] Existing crop suggestions and login still work.
-- [ ] Add focused automated tests for amount validation, date parsing, summary calculations, and database migration preservation.
+- [x] Sales entry works with valid numbers and rejects invalid input.
+- [x] Expenses remain available after restarting the app.
+- [x] Empty datasets, decimal amounts, and negative balances display correctly.
+- [x] Date filters work across month and year boundaries.
+- [x] Invalid legacy data is reported rather than silently ignored.
+- [x] Adding or deleting records refreshes the relevant totals.
+- [x] Cancelling deletion or CSV export makes no changes.
+- [x] Existing crop suggestions and login still work.
+- [x] Add focused automated tests for amount validation, date parsing, summary calculations, and database migration preservation.
 
 ## Suggested work order
 
@@ -154,6 +154,13 @@ Use temporary test databases so checks do not change real farm records.
 | 5 | Verification and a short README explaining how to run the app |
 
 Commit each completed milestone separately so it is easy to review or undo.
+
+## Verification completed
+
+- Six automated tests passed using temporary databases: validation, money rounding, persistence/deletion, date/crop filters, CSV export, and migration/backup preservation.
+- The optional GUI smoke check passed using copied application modules and temporary databases: login, dashboard, sales, expenses, automatic refresh, deletion/cancellation, CSV export/cancellation, crop windows, and logout.
+- Existing project databases were not migrated during development; the first launch of the new dashboard backs up and migrates sales data.
+- Financial UI is shared in `finance_ui.py`; the sales and expense modules provide small entry points.
 
 ## Later improvements
 

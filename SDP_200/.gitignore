@@ -1,0 +1,9 @@
+.venv/
+venv/
+venv.fish/
+__pycache__/
+*.py[cod]
+.DS_Store
+*.db
+*.db-*
+backups/
