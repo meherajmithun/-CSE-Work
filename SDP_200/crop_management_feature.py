@@ -4,9 +4,10 @@
 import customtkinter as ctk
 from tkinter import ttk, messagebox
 import sqlite3
+from finance_data import BASE_DIR
 
 def ensure_crops_db():
-    conn = sqlite3.connect("crops.db")
+    conn = sqlite3.connect(BASE_DIR / "crops.db")
     cur = conn.cursor()
     cur.execute("""
         CREATE TABLE IF NOT EXISTS crops(
@@ -99,7 +100,7 @@ def open_crop_management():
             messagebox.showerror("Error", "Days to harvest must be a non-negative integer", parent=win)
             return
 
-        conn = sqlite3.connect("crops.db")
+        conn = sqlite3.connect(BASE_DIR / "crops.db")
         cur = conn.cursor()
         cur.execute("""
             INSERT INTO crops (crop_name, days_to_harvest, soil_type, sunlight, water_req, category, season)

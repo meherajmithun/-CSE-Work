@@ -2,6 +2,7 @@
 import customtkinter as ctk
 from tkinter import ttk, messagebox
 import sqlite3
+from finance_data import BASE_DIR
 
 
 def open_crop_suggestion():
@@ -22,7 +23,7 @@ def open_crop_suggestion():
                   command=open_suggestion_from_database).pack(pady=10)
 
     # ✅ Option 2 (Future Update)
-   
+
 
 
 # ✅ SUGGESTION FROM DATABASE SCREEN
@@ -68,7 +69,7 @@ def open_suggestion_from_database():
         water = water_cb.get()
         season = season_cb.get()
 
-        conn = sqlite3.connect("crops.db")
+        conn = sqlite3.connect(BASE_DIR / "crops.db")
         cur = conn.cursor()
 
         cur.execute("""
