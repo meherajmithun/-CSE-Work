@@ -11,6 +11,9 @@ import customtkinter as ctk
 from crop_management_feature import open_crop_management
 from crop_suggestion_feature import open_crop_suggestion
 from sales_tracker_feature import open_sales_tracker
+from expense_tracker_feature import open_expense_tracker
+from finance_ui import FinanceDashboard
+from finance_data import BASE_DIR
 
 
 class Login_Window:
@@ -97,7 +100,7 @@ class Login_Window:
 
     # ===== Database Setup =====
     def setup_database(self):
-        conn = sqlite3.connect("admininfo.db")
+        conn = sqlite3.connect(BASE_DIR / "admininfo.db")
         cur = conn.cursor()
         cur.execute("""
             CREATE TABLE IF NOT EXISTS users(
@@ -116,7 +119,7 @@ class Login_Window:
             messagebox.showerror("Error", "All fields required!", parent=self.root)
             return
 
-        conn = sqlite3.connect("admininfo.db")
+        conn = sqlite3.connect(BASE_DIR / "admininfo.db")
         cur = conn.cursor()
         cur.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
         row = cur.fetchone()
@@ -147,7 +150,7 @@ class Login_Window:
             if user.get() == "" or pas.get() == "":
                 messagebox.showerror("Error", "All fields are required", parent=top)
                 return
-            conn = sqlite3.connect("admininfo.db")
+            conn = sqlite3.connect(BASE_DIR / "admininfo.db")
             cur = conn.cursor()
             try:
                 cur.execute("INSERT INTO users VALUES (?, ?)", (user.get(), pas.get()))
@@ -172,7 +175,8 @@ class Login_Window:
         dash = ctk.CTkToplevel(self.root)
         dash.title("Smart Agricultural System - Dashboard")
         dash.geometry("1000x650+400+200")
-        dash.resizable(False, False)
+        dash.minsize(1000, 650)
+        dash.protocol("WM_DELETE_WINDOW", lambda: self.logout(dash))
 
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("green")
@@ -214,19 +218,17 @@ class Login_Window:
         ctk.CTkButton(sidebar, text="Sales Tracker", font=("Verdana", 15, "bold"),
                       height=45, width=180, corner_radius=10,
                       fg_color="#a5d6a7", hover_color="#66bb6a",
-                      command=open_sales_tracker).pack(pady=15)
+                      command=lambda: open_sales_tracker(dash)).pack(pady=15)
 
-        ctk.CTkLabel(sidebar, text="(More features coming...)",
-                     text_color="#c8e6c9", font=("Verdana", 11, "italic")).pack(side="bottom", pady=20)
+        ctk.CTkButton(sidebar, text="Expense Tracker", font=("Verdana", 15, "bold"),
+                      height=45, width=180, fg_color="#a5d6a7", hover_color="#66bb6a",
+                      command=lambda: open_expense_tracker(dash)).pack(pady=15)
 
-        # ===== Content Area =====
-        content = ctk.CTkFrame(main_frame, fg_color="white")
-        content.pack(side="right", expand=True, fill="both")
-
-        ctk.CTkLabel(content, text="Welcome to the Smart Agro Dashboard 🌾",
-                     font=("Trebuchet MS", 22, "bold"), text_color="#1b5e20").place(relx=0.5, rely=0.3, anchor="center")
-        ctk.CTkLabel(content, text="Select an option from the left menu to begin",
-                     font=("Verdana", 14), text_color="#2e7d32").place(relx=0.5, rely=0.4, anchor="center")
+        try:
+            content = FinanceDashboard(main_frame)
+            content.pack(side="right", expand=True, fill="both")
+        except (sqlite3.Error, OSError) as exc:
+            messagebox.showerror("Cannot load finances", str(exc), parent=dash)
 
     # ===== Logout Function =====
     def logout(self, dashboard_window):
