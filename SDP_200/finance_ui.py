@@ -1,7 +1,7 @@
 """Shared widgets for the existing green CustomTkinter interface."""
 from datetime import date
 import sqlite3
-from tkinter import ttk, messagebox, filedialog
+from tkinter import Misc, ttk, filedialog
 import customtkinter as ctk
 from finance_data import FinanceStore, CATEGORIES, money, export_csv
 
@@ -29,16 +29,11 @@ def crop_choices(store):
 
 
 def open_tracker(kind, parent=None, on_change=None, store=None):
-    try:
-        store = store or FinanceStore()
-    except (sqlite3.Error, OSError) as exc:
-        messagebox.showerror('Cannot open records', str(exc), parent=parent)
-        return
+    store = store or FinanceStore()
     sale = kind == 'sales'
-    win = ctk.CTkToplevel(parent)
-    win.title('Crop Sales Tracker' if sale else 'Expense Tracker')
-    win.geometry('900x650')
-    win.minsize(720, 580)
+    win = ctk.CTkFrame(parent)
+    notice = ctk.CTkLabel(win, text='', text_color='#b71c1c', wraplength=650)
+    notice.pack(fill='x', padx=15, pady=(8, 0))
     tabs = ctk.CTkTabview(win)
     tabs.pack(fill='both', expand=True, padx=15, pady=15)
     add_tab = tabs.add('Add Sale' if sale else 'Add Expense')
@@ -94,7 +89,7 @@ def open_tracker(kind, parent=None, on_change=None, store=None):
             total = store.report()['revenue' if sale else 'expenses']
             status.configure(text=f'{len(rows)} records | Total: BDT {money(total)}' if rows else 'No records yet. Add your first entry.')
         except (sqlite3.Error, OSError, ValueError) as exc:
-            messagebox.showerror('Cannot load records', str(exc), parent=win)
+            notice.configure(text=f'Cannot load records: {exc}')
 
     def changed():
         refresh()
@@ -112,29 +107,49 @@ def open_tracker(kind, parent=None, on_change=None, store=None):
             else:
                 store.add_expense(crop_id, fields['Category'].get(), fields['Amount (BDT)'].get(), entered_date, fields['Notes (optional)'].get())
         except (ValueError, sqlite3.Error, OSError) as exc:
-            messagebox.showerror('Cannot save', str(exc), parent=win)
+            notice.configure(text=f'Cannot save: {exc}', text_color='#b71c1c')
             return
         for label, widget in fields.items():
             if label not in ('Crop', 'Category'):
                 widget.delete(0, 'end')
                 if label.startswith('Date'):
                     widget.insert(0, date.today().strftime('%d-%m-%Y'))
+        notice.configure(text='Record saved.', text_color='#1b5e20')
         changed()
         tabs.set('View Sales' if sale else 'View Expenses')
 
+    pending_delete = None
+
+    def cancel_delete():
+        nonlocal pending_delete
+        pending_delete = None
+        confirmation.pack_forget()
+
     def delete():
+        nonlocal pending_delete
         selected = tree.selection()
         if not selected:
-            messagebox.showinfo('Select a record', 'Select one row to delete.', parent=win)
+            notice.configure(text='Select one row to delete.', text_color='#b71c1c')
             return
-        if not messagebox.askyesno('Delete record?', 'Delete this record permanently?', parent=win):
+        pending_delete = int(selected[0])
+        confirmation.pack(fill='x', padx=12, pady=8)
+
+    def confirm_delete():
+        if pending_delete is None:
             return
         try:
-            store.delete(kind, int(selected[0]))
+            store.delete(kind, pending_delete)
         except sqlite3.Error as exc:
-            messagebox.showerror('Cannot delete', str(exc), parent=win)
+            notice.configure(text=f'Cannot delete: {exc}', text_color='#b71c1c')
             return
+        cancel_delete()
+        notice.configure(text='Record deleted.', text_color='#1b5e20')
         changed()
+
+    confirmation = ctk.CTkFrame(view_tab)
+    ctk.CTkLabel(confirmation, text='Permanently delete the selected record?').pack(side='left', padx=10)
+    ctk.CTkButton(confirmation, text='Confirm delete', command=confirm_delete, fg_color='#b71c1c').pack(side='left', padx=5, pady=8)
+    ctk.CTkButton(confirmation, text='Cancel', command=cancel_delete, width=80).pack(side='left', padx=5)
 
     ctk.CTkButton(add_tab, text='Save Sale' if sale else 'Save Expense', command=save, fg_color='#2e7d32').pack(pady=10)
     ctk.CTkButton(add_tab, text='Refresh crop list', command=refresh).pack(pady=5)
@@ -161,7 +176,9 @@ def bind_refresh(widget, callback):
     def cleanup(event):
         if event.widget == widget:
             root._finance_listeners.pop(widget, None)
-    widget.bind('<Destroy>', cleanup, add='+')
+    # CTkFrame.bind forwards to its drawing canvas. Bind to the actual frame
+    # so logout removes this page's listener before a new session starts.
+    Misc.bind(widget, '<Destroy>', cleanup, add='+')
 
 
 class FinanceDashboard(ctk.CTkFrame):
@@ -201,6 +218,12 @@ class FinanceDashboard(ctk.CTkFrame):
         bind_refresh(self, self.refresh)
         self.refresh()
 
+    def set_status(self, text):
+        self.status.configure(state='normal')
+        self.status.delete('1.0', 'end')
+        self.status.insert('1.0', text)
+        self.status.configure(state='disabled')
+
     def read_report(self):
         return self.store.report(self.choices.get(self.crop.get()), self.start.get(), self.end.get())
 
@@ -212,7 +235,7 @@ class FinanceDashboard(ctk.CTkFrame):
                 self.crop.set('All Crops')
             report = self.read_report()
         except (ValueError, sqlite3.Error, OSError) as exc:
-            messagebox.showerror('Cannot refresh report', str(exc), parent=self)
+            self.set_status(f'Cannot refresh report: {exc}')
             return None
         for label, key in zip(self.cards, ('revenue', 'expenses', 'balance')):
             label.configure(text=f'BDT {money(report[key])}', text_color='#b71c1c' if report[key] < 0 else '#1b5e20')
@@ -234,6 +257,6 @@ class FinanceDashboard(ctk.CTkFrame):
             path = filedialog.asksaveasfilename(parent=self, defaultextension='.csv', filetypes=[('CSV file', '*.csv')], initialfile='farm-finances.csv')
             if path:
                 export_csv(path, report)
-                messagebox.showinfo('Export complete', 'Your filtered report has been saved.', parent=self)
+                self.set_status('Your filtered report has been saved.')
         except (ValueError, sqlite3.Error, OSError) as exc:
-            messagebox.showerror('Cannot export', str(exc), parent=self)
+            self.set_status(f'Cannot export: {exc}')

@@ -1,37 +1,16 @@
 # IN THE NAME OF ALLAH
 import customtkinter as ctk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 import sqlite3
 from finance_data import BASE_DIR
 
 
-def open_crop_suggestion():
-    win = ctk.CTkToplevel()
-    win.title("Crop Suggestion")
-    win.geometry("480x350")
-    win.resizable(False, False)
-
-    ctk.CTkLabel(win, text="Crop Suggestion 🌾", font=("Verdana", 22, "bold")).pack(pady=20)
-
-    btn_frame = ctk.CTkFrame(win)
-    btn_frame.pack(pady=20)
-
-    # ✅ Option 1 (Main Feature)
-    ctk.CTkButton(btn_frame, text="Suggestion from Database",
-                  width=280, height=45,
-                  fg_color="#66bb6a", hover_color="#2e7d32",
-                  command=open_suggestion_from_database).pack(pady=10)
-
-    # ✅ Option 2 (Future Update)
+def open_crop_suggestion(parent):
+    return open_suggestion_from_database(parent)
 
 
-
-# ✅ SUGGESTION FROM DATABASE SCREEN
-def open_suggestion_from_database():
-    win = ctk.CTkToplevel()
-    win.title("Database Crop Suggestion")
-    win.geometry("600x450")
-    win.resizable(False, False)
+def open_suggestion_from_database(parent):
+    win = ctk.CTkFrame(parent)
 
     ctk.CTkLabel(win, text="Get Best Crop Suggestion 🌱",
                  font=("Verdana", 20, "bold")).pack(pady=20)
@@ -81,17 +60,11 @@ def open_suggestion_from_database():
         results = cur.fetchall()
         conn.close()
 
+        for child in result_win.winfo_children():
+            child.destroy()
         if not results:
-            messagebox.showinfo("No Result", "No matching crop found!")
+            ctk.CTkLabel(result_win, text='No matching crop found. Try different growing conditions.').pack(pady=15)
             return
-
-        # Create result window
-        result_win = ctk.CTkToplevel(win)
-        result_win.title("Suggested Crop")
-        result_win.geometry("400x350")
-
-        ctk.CTkLabel(result_win, text="Suggested Crops ✅",
-                     font=("Verdana", 20, "bold")).pack(pady=10)
 
         # Show all matched crops
         for name, category, days in results:
@@ -106,3 +79,8 @@ def open_suggestion_from_database():
     ctk.CTkButton(win, text="Search Crop", width=180, height=40,
                   fg_color="#2e7d32", hover_color="#1b5e20",
                   command=search_crop).pack(pady=25)
+
+    result_win = ctk.CTkScrollableFrame(win, label_text='Suggested crops')
+    result_win.pack(fill='both', expand=True, padx=20, pady=(0, 20))
+    ctk.CTkLabel(result_win, text='Choose growing conditions and select Search Crop.').pack(pady=15)
+    return win

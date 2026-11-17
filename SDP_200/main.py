@@ -1,13 +1,9 @@
-# main.py
-# IN THE NAME OF ALLAH
-
-from tkinter import *
-from tkinter import ttk, messagebox
-from PIL import Image, ImageTk, ImageDraw
-import sqlite3, os
+"""Single-window Smart Agricultural System."""
+import sqlite3
+from contextlib import closing
+from tkinter import Tk
 import customtkinter as ctk
 
-# Import features
 from crop_management_feature import open_crop_management
 from crop_suggestion_feature import open_crop_suggestion
 from sales_tracker_feature import open_sales_tracker
@@ -19,224 +15,151 @@ from finance_data import BASE_DIR
 class Login_Window:
     def __init__(self, root):
         self.root = root
-        self.root.title("Smart Agricultural System - Login")
-        self.root.geometry("1550x880+0+0")
-
-        # ===== Gradient Background =====
-        gradient = Image.new("RGB", (1550, 880), "#b3ffb3")
-        draw = ImageDraw.Draw(gradient)
-        for i in range(880):
-            color = (180 - i//10, 255 - i//5, 180 - i//10)
-            draw.line([(0, i), (1550, i)], fill=color)
-        self.bg = ImageTk.PhotoImage(gradient)
-        bg_lbl = Label(self.root, image=self.bg)
-        bg_lbl.place(x=0, y=0, relwidth=1, relheight=1)
-
-        # ===== Title Banner =====
-        title_lbl = Label(
-            self.root,
-            text="🌿 SMART AGRICULTURAL SYSTEM 🌿",
-            font=("Trebuchet MS", 28, "bold"),
-            fg="white",
-            bg="#1e5631",
-            relief="ridge",
-            bd=6,
-            padx=10,
-            pady=10
-        )
-        title_lbl.place(x=0, y=0, relwidth=1)
-
-        # ===== Login Frame =====
-        frame = Frame(self.root, bg="#0b3d0b", highlightbackground="#ffffff", highlightthickness=2)
-        frame.place(x=520, y=200, width=400, height=480)
-
-        img_path = "/home/meheraj/Pictures/295128.png"
-        if os.path.exists(img_path):
-            img = Image.open(img_path)
-            img = img.resize((90, 90), Image.LANCZOS)
-            self.photoimage1 = ImageTk.PhotoImage(img)
-            lblimg1 = Label(frame, image=self.photoimage1, bg="#0b3d0b", borderwidth=0)
-            lblimg1.place(x=150, y=10)
-        else:
-            lblimg1 = Label(frame, text="🌱", font=("Arial", 40), bg="#0b3d0b", fg="white")
-            lblimg1.place(x=170, y=20)
-
-        get_str = Label(frame, text="Welcome Back!", font=("Georgia", 20, "bold"), fg="white", bg="#0b3d0b")
-        get_str.place(x=110, y=110)
-
-        username_lbl = Label(frame, text="Username", font=("Verdana", 13, "bold"), fg="white", bg="#0b3d0b")
-        username_lbl.place(x=60, y=160)
-        self.txtuser = ttk.Entry(frame, font=("times new roman", 15, "bold"))
-        self.txtuser.place(x=60, y=190, width=280)
-
-        password_lbl = Label(frame, text="Password", font=("Verdana", 13, "bold"), fg="white", bg="#0b3d0b")
-        password_lbl.place(x=60, y=230)
-        self.txtpass = ttk.Entry(frame, font=("times new roman", 15, "bold"), show="*")
-        self.txtpass.place(x=60, y=260, width=280)
-
-        style = ttk.Style()
-        style.configure("TButton", font=("Verdana", 12, "bold"), padding=6)
-
-        loginbtn = Button(frame, text="Login", command=self.login, font=("Verdana", 13, "bold"),
-                          bd=3, relief=RIDGE, fg="white", bg="#1e5631", activeforeground="white",
-                          activebackground="#2e8b57", cursor="hand2")
-        loginbtn.place(x=60, y=310, width=280, height=40)
-
-        registerbtn = Button(frame, text="New User? Register", command=self.register,
-                             font=("Verdana", 10, "bold"), borderwidth=0,
-                             fg="#80ff80", bg="#0b3d0b", activeforeground="white", cursor="hand2")
-        registerbtn.place(x=60, y=370, width=280)
-
-        forgotbtn = Button(frame, text="Forgot Password?", command=self.forgot_password,
-                           font=("Verdana", 10, "bold"), borderwidth=0,
-                           fg="#ff9999", bg="#0b3d0b", activeforeground="white", cursor="hand2")
-        forgotbtn.place(x=60, y=400, width=280)
-
-        footer_lbl = Label(self.root, text="© 2025 Smart Agro System | Developed by Meheraj Mithun",
-                           font=("Verdana", 11), fg="white", bg="#1e5631")
-        footer_lbl.pack(side=BOTTOM, fill=X)
-
+        root.title('Smart Agricultural System')
+        root.geometry(f'{root.winfo_screenwidth()}x{root.winfo_screenheight()}+0+0')
+        root.minsize(900, 650)
+        ctk.set_appearance_mode('light')
+        ctk.set_default_color_theme('green')
+        self.fullscreen = True
+        root.attributes('-fullscreen', True)
+        root.bind('<Escape>', lambda event: self.set_fullscreen(False))
+        root.bind('<F11>', lambda event: self.set_fullscreen(not self.fullscreen))
+        toolbar = ctk.CTkFrame(root, fg_color='#1e5631', corner_radius=0)
+        toolbar.pack(fill='x')
+        ctk.CTkLabel(toolbar, text='SMART AGRICULTURAL SYSTEM', text_color='white',
+                     font=('Verdana', 20, 'bold')).pack(side='left', padx=20, pady=12)
+        ctk.CTkButton(toolbar, text='Exit app', width=80, command=root.destroy,
+                      fg_color='#b71c1c').pack(side='right', padx=(5, 15))
+        self.fullscreen_button = ctk.CTkButton(toolbar, text='Exit full screen', width=140,
+                                              command=lambda: self.set_fullscreen(not self.fullscreen))
+        self.fullscreen_button.pack(side='right', padx=5)
+        self.body = ctk.CTkFrame(root, fg_color='#e8f5e9', corner_radius=0)
+        self.body.pack(fill='both', expand=True)
         self.setup_database()
+        self.show_login()
 
-    # ===== Database Setup =====
+    def set_fullscreen(self, enabled):
+        self.fullscreen = enabled
+        self.root.attributes('-fullscreen', enabled)
+        self.fullscreen_button.configure(text='Exit full screen' if enabled else 'Full screen')
+        return 'break'
+
+    def clear_body(self):
+        for child in self.body.winfo_children():
+            child.destroy()
+        self.pages = {}
+
     def setup_database(self):
-        conn = sqlite3.connect(BASE_DIR / "admininfo.db")
-        cur = conn.cursor()
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS users(
-                username TEXT PRIMARY KEY,
-                password TEXT NOT NULL
-            )
-        """)
-        conn.commit()
-        conn.close()
+        with closing(sqlite3.connect(BASE_DIR / 'admininfo.db')) as conn, conn:
+            conn.execute('CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT NOT NULL)')
 
-    # ===== Login Function =====
+    def account_form(self, title):
+        self.clear_body()
+        panel = ctk.CTkFrame(self.body, fg_color='#0b3d0b', width=420)
+        panel.place(relx=0.5, rely=0.5, anchor='center')
+        ctk.CTkLabel(panel, text=title, font=('Verdana', 24, 'bold'), text_color='white').pack(padx=45, pady=(25, 20))
+        ctk.CTkLabel(panel, text='Username', text_color='white').pack(anchor='w', padx=30)
+        self.txtuser = ctk.CTkEntry(panel, width=320)
+        self.txtuser.pack(padx=30, pady=(5, 15))
+        ctk.CTkLabel(panel, text='Password', text_color='white').pack(anchor='w', padx=30)
+        self.txtpass = ctk.CTkEntry(panel, width=320, show='*')
+        self.txtpass.pack(padx=30, pady=(5, 15))
+        self.account_status = ctk.CTkLabel(panel, text='', text_color='#ffcccc', wraplength=320)
+        self.account_status.pack(padx=30, pady=5)
+        return panel
+
+    def show_login(self, message=''):
+        panel = self.account_form('Welcome back')
+        self.account_status.configure(text=message)
+        ctk.CTkButton(panel, text='Login', command=self.login, width=320).pack(padx=30, pady=10)
+        ctk.CTkButton(panel, text='New User? Register', command=self.register, width=320).pack(padx=30, pady=10)
+        ctk.CTkButton(panel, text='Forgot Password?', command=self.forgot_password, width=320).pack(padx=30, pady=(10, 25))
+        self.txtpass.bind('<Return>', lambda event: self.login())
+        self.txtuser.focus_set()
+
     def login(self):
-        username = self.txtuser.get()
-        password = self.txtpass.get()
-        if username == "" or password == "":
-            messagebox.showerror("Error", "All fields required!", parent=self.root)
+        username, password = self.txtuser.get().strip(), self.txtpass.get()
+        if not username or not password:
+            self.account_status.configure(text='Enter your username and password.')
             return
-
-        conn = sqlite3.connect(BASE_DIR / "admininfo.db")
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
-        row = cur.fetchone()
-        conn.close()
-
-        if row:
-            messagebox.showinfo("Success", f"Welcome {username}!", parent=self.root)
+        try:
+            with closing(sqlite3.connect(BASE_DIR / 'admininfo.db')) as conn:
+                found = conn.execute('SELECT 1 FROM users WHERE username=? AND password=?', (username, password)).fetchone()
+        except sqlite3.Error as exc:
+            self.account_status.configure(text=f'Cannot sign in: {exc}')
+            return
+        if found:
+            self.username = username
             self.open_dashboard()
         else:
-            messagebox.showerror("Error", "Invalid Username or Password", parent=self.root)
+            self.account_status.configure(text='Invalid username or password.')
 
-    # ===== Register Function =====
     def register(self):
-        top = Toplevel(self.root)
-        top.title("Register New User")
-        top.geometry("400x300+700+250")
-        top.config(bg="white")
-
-        Label(top, text="Create Account", font=("times new roman", 18, "bold"), bg="white").pack(pady=10)
-        Label(top, text="Username:", bg="white").pack()
-        user = Entry(top, font=("times new roman", 13))
-        user.pack(pady=5)
-        Label(top, text="Password:", bg="white").pack()
-        pas = Entry(top, font=("times new roman", 13), show="*")
-        pas.pack(pady=5)
-
+        panel = self.account_form('Create account')
         def save_user():
-            if user.get() == "" or pas.get() == "":
-                messagebox.showerror("Error", "All fields are required", parent=top)
+            username, password = self.txtuser.get().strip(), self.txtpass.get()
+            if not username or not password:
+                self.account_status.configure(text='Enter a username and password.')
                 return
-            conn = sqlite3.connect(BASE_DIR / "admininfo.db")
-            cur = conn.cursor()
             try:
-                cur.execute("INSERT INTO users VALUES (?, ?)", (user.get(), pas.get()))
-                conn.commit()
-                messagebox.showinfo("Success", "Account Created Successfully", parent=top)
-                top.destroy()
+                with closing(sqlite3.connect(BASE_DIR / 'admininfo.db')) as conn, conn:
+                    conn.execute('INSERT INTO users VALUES (?, ?)', (username, password))
             except sqlite3.IntegrityError:
-                messagebox.showerror("Error", "Username already exists", parent=top)
-            conn.close()
-
-        Button(top, text="Register", command=save_user, font=("times new roman", 13, "bold"),
-               bg="green", fg="white").pack(pady=20)
+                self.account_status.configure(text='Username already exists.')
+                return
+            except sqlite3.Error as exc:
+                self.account_status.configure(text=f'Cannot register: {exc}')
+                return
+            self.show_login('Account created. You can now sign in.')
+        ctk.CTkButton(panel, text='Register', command=save_user, width=320).pack(padx=30, pady=10)
+        ctk.CTkButton(panel, text='Back to login', command=self.show_login, width=320).pack(padx=30, pady=(10, 25))
 
     def forgot_password(self):
-        messagebox.showinfo("Info", "Password reset feature coming soon!", parent=self.root)
+        self.account_status.configure(text='Password recovery is not available yet.')
 
-    # ===== Dashboard =====
     def open_dashboard(self):
-        username = self.txtuser.get()
-        self.root.withdraw()
+        self.clear_body()
+        sidebar = ctk.CTkFrame(self.body, width=210, fg_color='#2e7d32', corner_radius=0)
+        sidebar.pack(side='left', fill='y')
+        ctk.CTkLabel(sidebar, text=f'Signed in as {self.username}', wraplength=180,
+                     text_color='white').pack(padx=15, pady=20)
+        self.content = ctk.CTkFrame(self.body, fg_color='white', corner_radius=0)
+        self.content.pack(side='right', fill='both', expand=True)
+        self.builders = {'Dashboard': FinanceDashboard, 'Crop Management': open_crop_management,
+                         'Crop Suggestion': open_crop_suggestion, 'Sales Tracker': open_sales_tracker,
+                         'Expense Tracker': open_expense_tracker}
+        self.nav_buttons = {}
+        for name in self.builders:
+            button = ctk.CTkButton(sidebar, text=name, width=180, height=42,
+                                   command=lambda page=name: self.show_page(page))
+            button.pack(padx=15, pady=8)
+            self.nav_buttons[name] = button
+        ctk.CTkButton(sidebar, text='Logout', width=180, command=self.logout,
+                      fg_color='#b71c1c').pack(side='bottom', padx=15, pady=20)
+        self.show_page('Dashboard')
 
-        dash = ctk.CTkToplevel(self.root)
-        dash.title("Smart Agricultural System - Dashboard")
-        dash.geometry("1000x650+400+200")
-        dash.minsize(1000, 650)
-        dash.protocol("WM_DELETE_WINDOW", lambda: self.logout(dash))
+    def show_page(self, name):
+        if name not in self.pages:
+            try:
+                self.pages[name] = self.builders[name](self.content)
+            except (sqlite3.Error, OSError) as exc:
+                page = ctk.CTkFrame(self.content)
+                ctk.CTkLabel(page, text=f'Cannot load {name}: {exc}', wraplength=600).pack(pady=30)
+                self.pages[name] = page
+        for page in self.pages.values():
+            page.pack_forget()
+        self.pages[name].pack(fill='both', expand=True)
+        self.current_page = self.pages[name]
+        for label, button in self.nav_buttons.items():
+            button.configure(fg_color='#164a28' if label == name else '#388e3c')
+        self.root.event_generate('<<FinanceChanged>>', when='tail')
 
-        ctk.set_appearance_mode("light")
-        ctk.set_default_color_theme("green")
-
-        # ===== Header =====
-        header = ctk.CTkFrame(dash, fg_color="#1e5631", height=70)
-        header.pack(fill="x")
-
-        logout_btn = ctk.CTkButton(header, text="Logout", fg_color="#b71c1c", hover_color="#7f0000",
-                                   width=90, command=lambda: self.logout(dash))
-        logout_btn.place(x=20, y=18)
-
-        ctk.CTkLabel(header, text="🌾 SMART AGRICULTURAL DASHBOARD 🌾",
-                     font=("Trebuchet MS", 24, "bold"), text_color="white").place(relx=0.5, rely=0.5, anchor="center")
-
-        ctk.CTkLabel(header, text=f"👤 {username}",
-                     font=("Verdana", 16, "bold"), text_color="white").place(x=830, y=18)
-
-        # ===== Main Frames =====
-        main_frame = ctk.CTkFrame(dash, corner_radius=0, fg_color="#e8f5e9")
-        main_frame.pack(fill="both", expand=True)
-
-        sidebar = ctk.CTkFrame(main_frame, width=220, fg_color="#2e7d32")
-        sidebar.pack(side="left", fill="y")
-
-        ctk.CTkLabel(sidebar, text="🌿 Menu", font=("Georgia", 20, "bold"), text_color="white").pack(pady=25)
-
-        # Crop Management Button
-        ctk.CTkButton(sidebar, text="Crop Management", font=("Verdana", 15, "bold"),
-                      height=45, width=180, corner_radius=10, fg_color="#66bb6a", hover_color="#388e3c",
-                      command=open_crop_management).pack(pady=15)
-
-        # Crop Suggestion Button
-        ctk.CTkButton(sidebar, text="Crop Suggestion", font=("Verdana", 15, "bold"),
-                      height=45, width=180, corner_radius=10, fg_color="#81c784",
-                      hover_color="#388e3c", command=open_crop_suggestion).pack(pady=15)
-
-        # Sales Tracker Button
-        ctk.CTkButton(sidebar, text="Sales Tracker", font=("Verdana", 15, "bold"),
-                      height=45, width=180, corner_radius=10,
-                      fg_color="#a5d6a7", hover_color="#66bb6a",
-                      command=lambda: open_sales_tracker(dash)).pack(pady=15)
-
-        ctk.CTkButton(sidebar, text="Expense Tracker", font=("Verdana", 15, "bold"),
-                      height=45, width=180, fg_color="#a5d6a7", hover_color="#66bb6a",
-                      command=lambda: open_expense_tracker(dash)).pack(pady=15)
-
-        try:
-            content = FinanceDashboard(main_frame)
-            content.pack(side="right", expand=True, fill="both")
-        except (sqlite3.Error, OSError) as exc:
-            messagebox.showerror("Cannot load finances", str(exc), parent=dash)
-
-    # ===== Logout Function =====
-    def logout(self, dashboard_window):
-        dashboard_window.destroy()
-        self.root.deiconify()
+    def logout(self):
+        self.username = ''
+        self.show_login()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     root = Tk()
     app = Login_Window(root)
     root.mainloop()

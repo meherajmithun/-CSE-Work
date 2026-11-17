@@ -158,9 +158,17 @@ Commit each completed milestone separately so it is easy to review or undo.
 ## Verification completed
 
 - Six automated tests passed using temporary databases: validation, money rounding, persistence/deletion, date/crop filters, CSV export, and migration/backup preservation.
-- The optional GUI smoke check passed using copied application modules and temporary databases: login, dashboard, sales, expenses, automatic refresh, deletion/cancellation, CSV export/cancellation, crop windows, and logout.
+- The optional GUI smoke check passed using copied application modules and temporary databases: login, dashboard, sales, expenses, automatic refresh, deletion/cancellation, CSV export/cancellation, crop pages, and logout.
 - Existing project databases were not migrated during development; the first launch of the new dashboard backs up and migrates sales data.
 - Financial UI is shared in `finance_ui.py`; the sales and expense modules provide small entry points.
+
+## Navigation update
+
+- All feature screens, registration, and crop suggestion results now stay inside the main application window.
+- The sidebar includes Dashboard navigation and preserves unfinished forms when changing pages.
+- Every launch starts full screen. Esc exits full screen, F11 toggles it, and toolbar buttons provide the same controls plus Exit app.
+- Save/error messages and deletion confirmation appear inline. CSV export retains its system save-file picker.
+- The GUI smoke check covers one-window navigation, registration, matching/no-match suggestions, finance workflows, full-screen controls, and logout/relogin.
 
 ## Later improvements
 

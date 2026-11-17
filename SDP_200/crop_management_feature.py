@@ -2,7 +2,7 @@
 # IN THE NAME OF ALLAH
 
 import customtkinter as ctk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 import sqlite3
 from finance_data import BASE_DIR
 
@@ -26,11 +26,8 @@ def ensure_crops_db():
 
 ensure_crops_db()
 
-def open_crop_management():
-    win = ctk.CTkToplevel()
-    win.title("Crop Management")
-    win.geometry("650x550+450+180")
-    win.resizable(False, False)
+def open_crop_management(parent):
+    win = ctk.CTkFrame(parent)
 
     ctk.CTkLabel(win, text="Crop Management 🌱", font=("Verdana", 20, "bold")).pack(pady=14)
 
@@ -79,6 +76,9 @@ def open_crop_management():
         except:
             pass
 
+    status = ctk.CTkLabel(win, text='', wraplength=600)
+    status.pack(padx=20, pady=5)
+
     def add_crop():
         name = crop_name.get().strip()
         days = days_to_harvest.get().strip()
@@ -89,7 +89,7 @@ def open_crop_management():
         season = season_cb.get()
 
         if not name or not days:
-            messagebox.showerror("Error", "Please fill Crop Name and Days to Harvest", parent=win)
+            status.configure(text="Please fill Crop Name and Days to Harvest", text_color="#b71c1c")
             return
 
         try:
@@ -97,7 +97,7 @@ def open_crop_management():
             if days_int < 0:
                 raise ValueError
         except ValueError:
-            messagebox.showerror("Error", "Days to harvest must be a non-negative integer", parent=win)
+            status.configure(text="Days to harvest must be a non-negative integer", text_color="#b71c1c")
             return
 
         conn = sqlite3.connect(BASE_DIR / "crops.db")
@@ -109,7 +109,8 @@ def open_crop_management():
         conn.commit()
         conn.close()
 
-        messagebox.showinfo("Success", f"Crop '{name}' added successfully!", parent=win)
+        status.configure(text=f"Crop '{name}' added successfully!", text_color="#1b5e20")
+        win._root().event_generate("<<FinanceChanged>>", when="tail")
         reset_fields()
 
     btn_frame = ctk.CTkFrame(win)
@@ -120,3 +121,5 @@ def open_crop_management():
 
     add_btn = ctk.CTkButton(btn_frame, text="Add Crop", width=140, command=add_crop, fg_color="#2e7d32")
     add_btn.pack(side="right", padx=10)
+
+    return win

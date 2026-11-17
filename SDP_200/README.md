@@ -17,14 +17,22 @@ On Windows, activate with `.venv\Scripts\activate` instead. If Python cannot imp
 
 Register an account, sign in, and add a crop using **Crop Management** before recording sales or expenses.
 
+## Window and navigation
+
+The app starts full screen on every launch. Use **Exit full screen** or **Esc** to return to a resizable window; use **Full screen** or **F11** to enter full screen again. **Exit app** closes the application.
+
+Login, registration, the dashboard, crop management, crop suggestions, sales, and expenses all use the same application window. Choose a page in the sidebar; use **Dashboard** to return to the totals. Forms keep their unfinished entries while switching pages during a session. Logging out clears the session's forms and returns to login in the same window.
+
+Crop suggestions appear below the search form. Save messages, validation errors, and deletion confirmation appear inside the page. CSV export uses the operating system's save-file picker to select a destination.
+
 ## Sales and expenses
 
 - **Sales Tracker:** select a crop, enter kilograms, price per kilogram in BDT, and a date. Saving opens the updated sales list.
 - **Expense Tracker:** select a crop and expense category, then enter an amount, date, and optional notes.
 - Dates default to today. Use `DD-MM-YYYY`; stored dates use `YYYY-MM-DD`.
 - Amounts must be positive. Money is rounded to the nearest paisa (0.01 taka), with half-paisa rounded up.
-- Use **Delete Selected** to remove an incorrect entry after confirmation, then enter its replacement. Editing existing entries is a future feature.
-- Use **Refresh crop list** if you added a crop while a tracker was already open.
+- Use **Delete Selected**, then **Confirm delete** in the page to remove an incorrect entry. **Cancel** keeps the record. Enter its replacement afterward. Editing existing entries is a future feature.
+- Use **Refresh crop list** if you added a crop while a tracker page was already loaded.
 
 ## Dashboard and export
 
@@ -32,7 +40,7 @@ The dashboard shows sales revenue, recorded expenses, and their difference. A ne
 
 Select **All Crops**, a specific crop, or **Unassigned records**. Optionally enter start/end dates and choose **Apply / Refresh**. Date boundaries are inclusive. Blank dates mean no date limit. **Export CSV** saves records, filter details, BDT totals, and data warnings for the selected filters.
 
-New sales and expenses update open trackers and dashboards automatically. A Refresh button is also available.
+New sales and expenses update loaded tracker pages and the dashboard automatically. A Refresh button is also available.
 
 ## Existing data and backups
 
@@ -58,6 +66,6 @@ python -m unittest discover -s tests -v
 
 Tests cover validation, rounding, persistence, deletion, crop/date filters, export, migration preservation, and backup behavior.
 
-For an optional desktop integration check, run `python tests/gui_smoke.py`. It opens temporary windows, copies the application modules into a temporary folder, and uses disposable databases. It requires a working desktop session and GUI dependencies.
+For an optional desktop integration check, run `python tests/gui_smoke.py`. It opens one full-screen test window, verifies navigation and full-screen controls, copies the application modules into a temporary folder, and uses disposable databases. It requires a working desktop session and GUI dependencies.
 
 See [FEATURE_PLAN.md](FEATURE_PLAN.md) for the implementation checklist and later improvements.

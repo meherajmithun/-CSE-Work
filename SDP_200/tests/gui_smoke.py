@@ -1,6 +1,4 @@
-"""Optional GUI integration check: run with a desktop session and dependencies.
-All application modules and database writes are isolated in a temporary folder.
-"""
+"""Desktop integration check using copied modules and disposable databases."""
 import faulthandler
 import shutil
 import sys
@@ -15,105 +13,149 @@ def descendants(widget):
 
 
 def run():
-    faulthandler.dump_traceback_later(30, exit=True)
+    faulthandler.dump_traceback_later(60, exit=True)
     with tempfile.TemporaryDirectory() as folder:
         for source in Path(__file__).resolve().parents[1].glob('*.py'):
             shutil.copy2(source, folder)
         sys.path.insert(0, folder)
         import tkinter as tk
-        from tkinter import ttk, messagebox, filedialog
+        from tkinter import ttk, filedialog
         import customtkinter as ctk
         import main
         from finance_data import FinanceStore
-        from finance_ui import FinanceDashboard
-        from sales_tracker_feature import open_sales_tracker
-        from expense_tracker_feature import open_expense_tracker
 
         errors = []
-        messagebox.showerror = lambda title, message, **kw: errors.append((title, message))
-        messagebox.showinfo = lambda *args, **kw: None
-        messagebox.askyesno = lambda *args, **kw: True
-        print('Creating Tk root', flush=True)
         root = tk.Tk()
         def pump():
-            root.after(300, root.quit)
+            root.after(350, root.quit)
             root.mainloop()
+
+        def one_window():
+            assert not [w for w in descendants(root) if isinstance(w, tk.Toplevel)]
+            assert root.state() != 'withdrawn'
+
+        def button(parent, text):
+            return next(w for w in descendants(parent) if isinstance(w, ctk.CTkButton) and w.cget('text') == text)
+
+        def entries(parent, values):
+            widgets = [w for w in descendants(parent) if isinstance(w, ctk.CTkEntry)]
+            assert len(widgets) == len(values), (len(widgets), values)
+            for widget, value in zip(widgets, values):
+                widget.delete(0, 'end')
+                widget.insert(0, value)
+
+        def navigate(name):
+            button(root, name).invoke()
+            pump()
+            one_window()
+            return app.current_page
 
         root.report_callback_exception = lambda *args: errors.append(args)
         try:
-            print('Building login', flush=True)
+            print('Checking full-screen startup and account navigation', flush=True)
             app = main.Login_Window(root)
+            pump()
+            assert bool(root.attributes('-fullscreen')), (app.fullscreen, root.attributes('-fullscreen'))
+            assert root.winfo_width() >= root.winfo_screenwidth() * .9
+            button(root, 'Forgot Password?').invoke()
+            one_window()
+            button(root, 'New User? Register').invoke()
+            one_window()
+            entries(app.body, ['demo', 'test-only'])
+            button(root, 'Register').invoke()
+            pump()
+            entries(app.body, ['demo', 'test-only'])
+            button(root, 'Login').invoke()
+            pump()
+            one_window()
+            dashboard = app.current_page
             store = FinanceStore(folder)
-            with store.connect() as conn:
-                pass
-            import sqlite3
-            with sqlite3.connect(store.crops_path) as conn:
-                conn.execute("INSERT INTO crops (crop_name) VALUES ('Rice')")
-            with sqlite3.connect(Path(folder) / 'admininfo.db') as conn:
-                conn.execute("INSERT INTO users VALUES ('demo', 'test-only')")
-            app.txtuser.insert(0, 'demo')
-            app.txtpass.insert(0, 'test-only')
-            print('Signing in', flush=True)
-            app.login()
+
+            print('Checking crop entry and inline suggestion results', flush=True)
+            crop = navigate('Crop Management')
+            entries(crop, ['Rice', '90'])
+            button(crop, 'Add Crop').invoke()
             pump()
-            dashboards = [w for w in descendants(root) if isinstance(w, FinanceDashboard)]
-            assert len(dashboards) == 1
-            dashboard = dashboards[0]
-            dash = dashboard.winfo_toplevel()
-
-            def button(window, text):
-                return next(w for w in descendants(window) if isinstance(w, ctk.CTkButton) and w.cget('text') == text)
-
-            def entries(window, values):
-                widgets = [w for w in descendants(window) if isinstance(w, ctk.CTkEntry)]
-                assert len(widgets) == len(values), (len(widgets), values)
-                for widget, value in zip(widgets, values):
-                    widget.delete(0, 'end')
-                    widget.insert(0, value)
-
-            print('Opening trackers', flush=True)
-            sales = open_sales_tracker(dash, store=store)
-            expense = open_expense_tracker(dash, store=store)
+            assert len(store.crops()) == 1
+            one_window()
+            suggestion = navigate('Crop Suggestion')
+            button(suggestion, 'Search Crop').invoke()
             pump()
+            one_window()
+            assert any(isinstance(w, ctk.CTkLabel) and 'Rice' in w.cget('text') for w in descendants(suggestion))
+            combos = [w for w in descendants(suggestion) if isinstance(w, ttk.Combobox)]
+            combos[0].current(1)
+            button(suggestion, 'Search Crop').invoke()
+            pump()
+            assert any(isinstance(w, ctk.CTkLabel) and 'No matching crop' in w.cget('text') for w in descendants(suggestion))
+            one_window()
+
+            print('Checking in-page finance workflows and preserved forms', flush=True)
+            sales = navigate('Sales Tracker')
             entries(sales, ['10', '25', '17-11-2026'])
+            navigate('Dashboard')
+            assert navigate('Sales Tracker') is sales
             button(sales, 'Save Sale').invoke()
             pump()
+            one_window()
             assert dashboard.cards[0].cget('text') == 'BDT 250.00'
+            expense = navigate('Expense Tracker')
             entries(expense, ['150.50', '17-11-2026', 'Seeds'])
             button(expense, 'Save Expense').invoke()
             pump()
-            assert dashboard.cards[1].cget('text') == 'BDT 150.50'
+            one_window()
             assert dashboard.cards[2].cget('text') == 'BDT 99.50'
             tree = next(w for w in descendants(expense) if isinstance(w, ttk.Treeview))
             tree.selection_set(tree.get_children()[0])
-            messagebox.askyesno = lambda *args, **kw: False
             button(expense, 'Delete Selected').invoke()
+            one_window()
+            button(expense, 'Cancel').invoke()
             assert len(store.rows('expenses')) == 1
-            messagebox.askyesno = lambda *args, **kw: True
             button(expense, 'Delete Selected').invoke()
+            button(expense, 'Confirm delete').invoke()
             pump()
             assert store.rows('expenses') == []
             assert dashboard.cards[2].cget('text') == 'BDT 250.00'
-            expense.destroy()
-            entries(sales, ['1', '10', '17-11-2026'])
-            button(sales, 'Save Sale').invoke()
-            pump()
-            assert dashboard.cards[0].cget('text') == 'BDT 260.00'
+            navigate('Dashboard')
             filedialog.asksaveasfilename = lambda **kw: ''
-            dashboard.export()  # Cancellation must not write anything.
+            dashboard.export()
             output = Path(folder) / 'report.csv'
             assert not output.exists()
             filedialog.asksaveasfilename = lambda **kw: str(output)
             dashboard.export()
             assert output.exists()
-            main.open_crop_suggestion()
-            main.open_crop_management()
+            one_window()
+
+            print('Checking full-screen controls and session cleanup', flush=True)
+            root.focus_force()
+            root.event_generate('<Escape>')
             pump()
+            assert not bool(root.attributes('-fullscreen'))
+            # macOS reserves F11; synthetic F11 events are not portable.
+            # Check the binding and exercise the same toggle through the UI.
+            assert root.bind('<F11>')
+            button(root, 'Full screen').invoke()
+            pump()
+            assert bool(root.attributes('-fullscreen')), (app.fullscreen, root.attributes('-fullscreen'))
+            button(root, 'Exit full screen').invoke()
+            pump()
+            assert not bool(root.attributes('-fullscreen'))
+            button(root, 'Full screen').invoke()
+            pump()
+            assert bool(root.attributes('-fullscreen')), (app.fullscreen, root.attributes('-fullscreen'))
+            button(root, 'Logout').invoke()
+            pump()
+            one_window()
+            assert bool(root.attributes('-fullscreen')), (app.fullscreen, root.attributes('-fullscreen'))
+            assert not root._finance_listeners
             assert not errors, errors
-            app.logout(dash)
+            entries(app.body, ['demo', 'test-only'])
+            button(root, 'Login').invoke()
             pump()
-            assert root.state() == 'normal'
-            print('GUI smoke passed: login, dashboard, sales, expenses, refresh, delete/cancel, export/cancel, crop windows, logout.')
+            one_window()
+            assert app.current_page.cards[0].cget('text') == 'BDT 250.00'
+            assert not errors, errors
+            print('GUI smoke passed: one window, full screen, registration/login, all pages, inline results, preserved forms, finance, export, logout/relogin.')
         finally:
             root.destroy()
             faulthandler.cancel_dump_traceback_later()
